@@ -1,0 +1,67 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Sat Nov 18 16:10:26 2017
+
+@author: 17408709
+"""
+
+from sklearn.decomposition import pca
+import numpy as np
+import pandas as pd 
+import matplotlib.pyplot as plt
+#import matplotlib as mpl
+from sklearn.decomposition import PCA
+from sklearn.manifold import LocallyLinearEmbedding as LLE
+#from mpl_toolkits.mplot3d import axes3d
+
+data=pd.read_csv('iris.csv')
+columns=[data.columns[i] for i in range(data.shape[1])]
+
+Y=data[columns[-1]]
+Y=pd.Categorical(Y).codes
+
+X=data[columns[0:len(columns)-1]]
+X=np.array(X)
+
+pca=PCA(n_components=2,whiten=False)
+X_pca=pca.fit_transform(X)
+
+
+plt.scatter(X_pca[Y==0,0],X_pca[Y==0,1],c='r',marker='*')
+plt.scatter(X_pca[Y==1,0],X_pca[Y==1,1],c='b',marker='o')
+plt.scatter(X_pca[Y==2,0],X_pca[Y==2,1],c='g',marker='+')
+plt.title('Dimension reduction of PCA')
+plt.show()
+
+
+def OCM(X,Y):
+#    X=np.transpose(X)
+#    Y=np.transpose(Y)
+    C=[np.mean(X[Y==i,:],axis=0) for i in range(0,max(Y)+1)]
+    C=np.array(C)
+    C=np.transpose(C)
+    Q,R=np.linalg.qr(C)
+    X_OCM=np.mat(X)*np.mat(Q)
+    X_OCM=np.array(X_OCM)
+    return X_OCM
+
+
+X_OCM=OCM(X,Y)
+
+
+fig=plt.figure()
+ax = fig.add_subplot(111,projection='3d')
+ax.scatter(X_OCM[Y==0,0],X_OCM[Y==0,1],X_OCM[Y==0,2],c='r',marker='*')
+ax.scatter(X_OCM[Y==1,0],X_OCM[Y==1,1],X_OCM[Y==1,2],c='b',marker='o')
+ax.scatter(X_OCM[Y==2,0],X_OCM[Y==2,1],X_OCM[Y==2,2],c='g',marker='+')
+plt.title('Dimension reduction of OCM')
+plt.show()
+
+lle=LLE(n_neighbors=5,n_components=2)
+X_LLE=lle.fit_transform(X)
+
+plt.scatter(X_LLE[Y==0,0],X_LLE[Y==0,1],c='r',marker='*')
+plt.scatter(X_LLE[Y==1,0],X_LLE[Y==1,1],c='b',marker='o')
+plt.scatter(X_LLE[Y==2,0],X_LLE[Y==2,1],c='g',marker='+')
+plt.title('Dimension reduction of LLE')
+plt.show()
